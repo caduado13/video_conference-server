@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const passport = require("passport")
+const jwt = require('jsonwebtoken');
 
 const loginController =  {
     register: async (req, res) => {
@@ -42,6 +43,8 @@ const loginController =  {
           if (!user) {
             return res.status(404).send(info.message);
           }
+          const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);  
+          
       
           req.logIn(user, (loginErr) => {
             if (loginErr) {
@@ -50,7 +53,7 @@ const loginController =  {
       
             req.session.userSession = user.user;
             const userSession = req.session.userSession;
-            return res.send(`Olá, ${userSession}!`);
+            res.json({ token, message: `Olá, ${userSession}!` });
           });
         })(req, res, next);
       },
